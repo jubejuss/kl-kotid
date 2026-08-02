@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="KL Kotid">
 <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
 <title>KL Kotid</title>
 <style>
 :root {
@@ -173,6 +175,12 @@ header h1 { font-size: 28px; font-weight: 700; }
   border-bottom: 1px solid var(--border); gap: 10px;
 }
 .search-result .path { font-size: 12px; color: var(--text2); }
+
+#install-banner {
+  display: none; margin: 8px 16px; padding: 14px 16px;
+  background: var(--accent); color: #fff; border-radius: 12px;
+  text-align: center; cursor: pointer; font-weight: 600; font-size: 15px;
+}
 </style>
 </head>
 <body>
@@ -181,6 +189,7 @@ header h1 { font-size: 28px; font-weight: 700; }
   <button class="btn-add" onclick="showAddBag()" title="Uus kott">+</button>
 </header>
 <input class="search" type="search" placeholder="Otsi varustust..." oninput="onSearch(this.value)">
+<div id="install-banner" onclick="installApp()">Paigalda rakendus</div>
 <div id="app"></div>
 <div class="hint">Vajuta koti nimele, et avada. Nupud asjade liigutamiseks ja kustutamiseks.</div>
 
@@ -501,6 +510,40 @@ function doMove(itemId) {
   item.order = siblings.length ? Math.max(...siblings.map(s => s.order)) + 1 : 0;
   openSections.add(targetId);
   save(); closeModal(); render();
+}
+
+// Install prompt
+let deferredPrompt = null;
+const banner = document.getElementById('install-banner');
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  banner.style.display = 'block';
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      banner.style.display = 'none';
+    });
+  }
+}
+
+window.addEventListener('appinstalled', () => {
+  banner.style.display = 'none';
+});
+
+// iOS install hint
+const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+const isStandalone = window.navigator.standalone === true;
+if (isIos && !isStandalone) {
+  banner.textContent = 'Paigalda: Safari → jagamine → "Lisa avakuvale"';
+  banner.style.display = 'block';
+  banner.style.cursor = 'default';
+  banner.onclick = null;
 }
 
 // Init
