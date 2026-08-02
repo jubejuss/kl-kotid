@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="KL Kotid">
+<link rel="manifest" href="manifest.json">
+<title>KL Kotid</title>
+<style>
+:root {
+  --bg: #f2f2f7;
+  --card: #fff;
+  --text: #1c1c1e;
+  --text2: #8e8e93;
+  --text3: #c7c7cc;
+  --accent: #385a4a;
+  --danger: #ff3b30;
+  --border: #e5e5ea;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000;
+    --card: #1c1c1e;
+    --text: #f2f2f7;
+    --text2: #8e8e93;
+    --text3: #48484a;
+    --border: #38383a;
+  }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  -webkit-user-select: none; user-select: none;
+  min-height: 100dvh;
+}
+header {
+  padding: 12px 20px 8px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+header h1 { font-size: 28px; font-weight: 700; }
+.btn-add {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent); color: #fff; border: none;
+  font-size: 22px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.search {
+  margin: 4px 16px 8px; padding: 8px 12px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  font-size: 15px; color: var(--text); width: calc(100% - 32px);
+  outline: none;
+}
+.search::placeholder { color: var(--text2); }
+.hint {
+  text-align: center; font-size: 12px; color: var(--text3);
+  padding: 12px 20px 20px;
+}
+#app { padding: 0 0 80px; }
+
+.bag {
+  margin: 8px 16px; background: var(--card);
+  border-radius: 12px; overflow: hidden;
+}
+.bag-header {
+  display: flex; align-items: center; padding: 14px 16px;
+  cursor: pointer; gap: 10px;
+}
+.bag-header .icon { font-size: 18px; color: var(--accent); }
+.bag-header .name { flex: 1; font-weight: 600; font-size: 16px; }
+.bag-header .count {
+  font-size: 12px; color: var(--text2);
+  background: var(--bg); padding: 2px 8px; border-radius: 10px;
+}
+.bag-header .chevron {
+  font-size: 13px; color: var(--text2);
+  transition: transform 0.2s;
+}
+.bag-header.open .chevron { transform: rotate(90deg); }
+.bag-content { display: none; }
+.bag-header.open + .bag-content { display: block; }
+
+.sub-header {
+  display: flex; align-items: center; padding: 10px 16px 10px 36px;
+  cursor: pointer; gap: 8px;
+}
+.sub-header .icon { font-size: 13px; color: var(--text2); }
+.sub-header .name { flex: 1; font-size: 15px; }
+.sub-header .count {
+  font-size: 11px; color: var(--text2);
+  background: var(--bg); padding: 1px 6px; border-radius: 8px;
+}
+.sub-header .chevron { font-size: 11px; color: var(--text2); transition: transform 0.2s; }
+.sub-header.open .chevron { transform: rotate(90deg); }
+.sub-content { display: none; }
+.sub-header.open + .sub-content { display: block; }
+
+.item {
+  display: flex; align-items: center; padding: 10px 16px 10px 48px;
+  border-top: 1px solid var(--border); gap: 8px;
+  position: relative; overflow: hidden;
+}
+.item.depth2 { padding-left: 64px; }
+.item .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+.item .name { flex: 1; font-size: 15px; }
+.item .actions {
+  display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s;
+}
+.item:hover .actions, .item:focus-within .actions { opacity: 1; }
+.action-btn {
+  background: none; border: none; color: var(--text2);
+  font-size: 16px; padding: 4px; cursor: pointer; border-radius: 6px;
+}
+.action-btn:hover { background: var(--bg); }
+.action-btn.danger { color: var(--danger); }
+
+.add-row {
+  display: flex; align-items: center; padding: 10px 16px 10px 48px;
+  border-top: 1px solid var(--border); gap: 8px;
+  cursor: pointer; color: var(--text2); font-size: 14px;
+}
+.add-row.depth2 { padding-left: 64px; }
+.add-row:hover { color: var(--accent); }
+
+/* Mobile: show actions always */
+@media (hover: none) {
+  .item .actions { opacity: 1; }
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal {
+  background: var(--card); border-radius: 16px 16px 0 0;
+  width: 100%; max-width: 500px; padding: 20px 20px calc(20px + var(--safe-bottom));
+  transform: translateY(100%); transition: transform 0.3s;
+}
+.modal-overlay.active .modal { transform: translateY(0); }
+.modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
+.modal input, .modal select {
+  width: 100%; padding: 12px; border: 1px solid var(--border);
+  border-radius: 10px; font-size: 16px; background: var(--bg);
+  color: var(--text); margin-bottom: 12px; outline: none;
+}
+.modal select { appearance: none; }
+.modal label {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 15px; margin-bottom: 16px; color: var(--text2);
+}
+.modal label input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); }
+.modal-btns { display: flex; gap: 10px; }
+.modal-btns button {
+  flex: 1; padding: 12px; border-radius: 10px; border: none;
+  font-size: 16px; font-weight: 600; cursor: pointer;
+}
+.modal-btns .cancel { background: var(--bg); color: var(--text); }
+.modal-btns .confirm { background: var(--accent); color: #fff; }
+
+/* Search results */
+.search-result {
+  display: flex; align-items: center; padding: 12px 16px;
+  border-bottom: 1px solid var(--border); gap: 10px;
+}
+.search-result .path { font-size: 12px; color: var(--text2); }
+</style>
+</head>
+<body>
+<header>
+  <h1>KL Kotid</h1>
+  <button class="btn-add" onclick="showAddBag()" title="Uus kott">+</button>
+</header>
+<input class="search" type="search" placeholder="Otsi varustust..." oninput="onSearch(this.value)">
+<div id="app"></div>
+<div class="hint">Vajuta koti nimele, et avada. Nupud asjade liigutamiseks ja kustutamiseks.</div>
+
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'kl-kotid-data';
+
+const DEFAULT_DATA = [
+  { id: 1, name: "Vormi varrukad", isContainer: true, parentId: null, order: 0 },
+  { id: 2, name: "Pisiprillid", isContainer: false, parentId: 1, order: 0 },
+  { id: 3, name: "Kõrvatropid", isContainer: false, parentId: 1, order: 1 },
+
+  { id: 4, name: "Taktikaline vöö", isContainer: true, parentId: null, order: 1 },
+  { id: 5, name: "Prillid", isContainer: false, parentId: 4, order: 0 },
+  { id: 6, name: "Vesi", isContainer: false, parentId: 4, order: 1 },
+
+  { id: 7, name: "3-1 tagakott", isContainer: true, parentId: null, order: 2 },
+  { id: 8, name: "Pealamp", isContainer: false, parentId: 7, order: 0 },
+  { id: 9, name: "Torusall", isContainer: false, parentId: 7, order: 1 },
+  { id: 10, name: "Kiivrialune müts", isContainer: false, parentId: 7, order: 2 },
+  { id: 11, name: "Kindad", isContainer: false, parentId: 7, order: 3 },
+
+  { id: 12, name: "Kott", isContainer: true, parentId: null, order: 3 },
+  { id: 13, name: "Vasak tasku", isContainer: true, parentId: 12, order: 0 },
+  { id: 14, name: "Toiduasjad", isContainer: false, parentId: 13, order: 0 },
+  { id: 15, name: "Põlvekaitsed", isContainer: false, parentId: 13, order: 1 },
+  { id: 16, name: "Parem tasku", isContainer: true, parentId: 12, order: 1 },
+  { id: 17, name: "Labidas", isContainer: false, parentId: 16, order: 0 },
+  { id: 18, name: "Bivi + vaiad + nöör", isContainer: false, parentId: 16, order: 1 },
+  { id: 19, name: "Kilejope", isContainer: false, parentId: 12, order: 2 },
+  { id: 20, name: "Sviiter", isContainer: false, parentId: 12, order: 3 },
+  { id: 21, name: "Teised püksid", isContainer: false, parentId: 12, order: 4 },
+  { id: 22, name: "Teine frentš või vestialune särk", isContainer: false, parentId: 12, order: 5 },
+  { id: 23, name: "3 pk toitu", isContainer: false, parentId: 12, order: 6 },
+  { id: 24, name: "Kilekott riietega", isContainer: true, parentId: 12, order: 7 },
+  { id: 25, name: "4 paari sokke", isContainer: false, parentId: 24, order: 0 },
+  { id: 26, name: "2 paari trussikuid", isContainer: false, parentId: 24, order: 1 },
+  { id: 27, name: "2 puuvillast t-särki", isContainer: false, parentId: 24, order: 2 },
+  { id: 28, name: "1 mil t-särk", isContainer: false, parentId: 24, order: 3 },
+
+  { id: 29, name: "Patrullkott", isContainer: true, parentId: null, order: 4 },
+  { id: 30, name: "Käterätik", isContainer: false, parentId: 29, order: 0 },
+  { id: 31, name: "Hambatarbed", isContainer: false, parentId: 29, order: 1 },
+  { id: 32, name: "1 x toit", isContainer: false, parentId: 29, order: 2 },
+  { id: 33, name: "2 paari sokke", isContainer: false, parentId: 29, order: 3 },
+  { id: 34, name: "Trussad", isContainer: false, parentId: 29, order: 4 },
+  { id: 35, name: "T-särk", isContainer: false, parentId: 29, order: 5 },
+  { id: 36, name: "Hügieen", isContainer: false, parentId: 29, order: 6 },
+  { id: 37, name: "Õpikud", isContainer: false, parentId: 29, order: 7 },
+  { id: 38, name: "Ülemine tasku", isContainer: true, parentId: 29, order: 8 },
+  { id: 39, name: "Nõeladniidid", isContainer: false, parentId: 38, order: 0 },
+  { id: 40, name: "Kõrvatropid", isContainer: false, parentId: 38, order: 1 },
+  { id: 41, name: "Prillid", isContainer: false, parentId: 38, order: 2 },
+  { id: 42, name: "Mobiililaadija", isContainer: false, parentId: 38, order: 3 },
+  { id: 43, name: "Akupank", isContainer: false, parentId: 38, order: 4 },
+  { id: 44, name: "Rohelise teibiga pisikott – esmaabi", isContainer: true, parentId: 29, order: 9 },
+  { id: 45, name: "Õmblus", isContainer: false, parentId: 44, order: 0 },
+  { id: 46, name: "Sidemed", isContainer: false, parentId: 44, order: 1 },
+  { id: 47, name: "Kõrvatropid", isContainer: false, parentId: 44, order: 2 },
+  { id: 48, name: "Kummiga konksud", isContainer: false, parentId: 44, order: 3 },
+  { id: 49, name: "Teine pisikott", isContainer: true, parentId: 29, order: 10 },
+  { id: 50, name: "Kindad", isContainer: false, parentId: 49, order: 0 },
+  { id: 51, name: "Teip", isContainer: false, parentId: 49, order: 1 },
+  { id: 52, name: "Kamopastad", isContainer: false, parentId: 49, order: 2 },
+  { id: 53, name: "Helkur", isContainer: false, parentId: 49, order: 3 },
+  { id: 54, name: "Varukaitseprillid", isContainer: false, parentId: 49, order: 4 },
+];
+
+let data = [];
+let nextId = 100;
+let openSections = new Set();
+
+function load() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    data = JSON.parse(stored);
+  } else {
+    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  }
+  nextId = Math.max(...data.map(d => d.id), 0) + 1;
+}
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function getChildren(parentId) {
+  return data.filter(d => d.parentId === parentId).sort((a, b) => a.order - b.order);
+}
+
+function countItems(parentId) {
+  const children = getChildren(parentId);
+  let count = 0;
+  for (const c of children) {
+    if (c.isContainer) count += countItems(c.id);
+    else count++;
+  }
+  return count;
+}
+
+function getPath(nodeId) {
+  const parts = [];
+  let current = data.find(d => d.id === nodeId);
+  while (current) {
+    parts.unshift(current.name);
+    current = current.parentId ? data.find(d => d.id === current.parentId) : null;
+  }
+  return parts.join(' > ');
+}
+
+function getAllContainers() {
+  return data.filter(d => d.isContainer);
+}
+
+function deleteNode(id) {
+  const children = getChildren(id);
+  for (const c of children) deleteNode(c.id);
+  data = data.filter(d => d.id !== id);
+}
+
+function render() {
+  const app = document.getElementById('app');
+  const bags = getChildren(null);
+  app.innerHTML = bags.map(bag => renderBag(bag)).join('');
+}
+
+function renderBag(bag) {
+  const isOpen = openSections.has(bag.id);
+  const count = countItems(bag.id);
+  const children = getChildren(bag.id);
+  const containers = children.filter(c => c.isContainer);
+  const items = children.filter(c => !c.isContainer);
+
+  let content = '';
+  for (const child of children) {
+    if (child.isContainer) {
+      content += renderSubContainer(child);
+    } else {
+      content += renderItem(child, 1);
+    }
+  }
+  content += `<div class="add-row" onclick="showAddItem(${bag.id})">+ Lisa...</div>`;
+
+  return `<div class="bag">
+    <div class="bag-header ${isOpen ? 'open' : ''}" onclick="toggle(${bag.id})">
+      <span class="icon">&#x1F392;</span>
+      <span class="name">${esc(bag.name)}</span>
+      <span class="count">${count}</span>
+      <span class="chevron">&#x276F;</span>
+    </div>
+    <div class="bag-content">${content}</div>
+  </div>`;
+}
+
+function renderSubContainer(node) {
+  const isOpen = openSections.has(node.id);
+  const count = countItems(node.id);
+  const children = getChildren(node.id);
+
+  let content = '';
+  for (const child of children) {
+    if (child.isContainer) {
+      content += renderSubContainer(child);
+    } else {
+      content += renderItem(child, 2);
+    }
+  }
+  content += `<div class="add-row depth2" onclick="showAddItem(${node.id})">+ Lisa...</div>`;
+
+  return `<div class="sub-header ${isOpen ? 'open' : ''}" onclick="toggle(${node.id})">
+    <span class="icon">&#x1F4C1;</span>
+    <span class="name">${esc(node.name)}</span>
+    <span class="count">${count}</span>
+    <span class="chevron">&#x276F;</span>
+    <button class="action-btn danger" onclick="event.stopPropagation();confirmDelete(${node.id},'${esc(node.name)}')" title="Kustuta">&#x2715;</button>
+  </div>
+  <div class="sub-content">${content}</div>`;
+}
+
+function renderItem(item, depth) {
+  const depthClass = depth >= 2 ? ' depth2' : '';
+  return `<div class="item${depthClass}">
+    <span class="dot"></span>
+    <span class="name">${esc(item.name)}</span>
+    <span class="actions">
+      <button class="action-btn" onclick="showMoveItem(${item.id})" title="Liiguta">&#x21C5;</button>
+      <button class="action-btn danger" onclick="confirmDelete(${item.id},'${esc(item.name)}')" title="Kustuta">&#x2715;</button>
+    </span>
+  </div>`;
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function toggle(id) {
+  if (openSections.has(id)) openSections.delete(id);
+  else openSections.add(id);
+  render();
+}
+
+function onSearch(query) {
+  const app = document.getElementById('app');
+  if (!query.trim()) { render(); return; }
+  const q = query.toLowerCase();
+  const matches = data.filter(d => d.name.toLowerCase().includes(q));
+  app.innerHTML = matches.map(m => {
+    const path = m.parentId ? getPath(m.parentId) : '';
+    return `<div class="search-result">
+      <span class="name">${esc(m.name)}</span>
+      ${path ? `<span class="path">${esc(path)}</span>` : ''}
+    </div>`;
+  }).join('') || '<div class="hint">Ei leitud</div>';
+}
+
+// Modals
+function openModal(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+function showAddBag() {
+  openModal(`
+    <h3>Uus kott</h3>
+    <input type="text" id="m-name" placeholder="Koti nimetus" autofocus>
+    <div class="modal-btns">
+      <button class="cancel" onclick="closeModal()">Tühista</button>
+      <button class="confirm" onclick="doAddBag()">Lisa</button>
+    </div>
+  `);
+  setTimeout(() => document.getElementById('m-name')?.focus(), 300);
+}
+
+function doAddBag() {
+  const name = document.getElementById('m-name').value.trim();
+  if (!name) return;
+  const bags = getChildren(null);
+  const maxOrder = bags.length ? Math.max(...bags.map(b => b.order)) + 1 : 0;
+  data.push({ id: nextId++, name, isContainer: true, parentId: null, order: maxOrder });
+  save(); closeModal(); render();
+}
+
+function showAddItem(containerId) {
+  const container = data.find(d => d.id === containerId);
+  openModal(`
+    <h3>Lisa: ${esc(container.name)}</h3>
+    <input type="text" id="m-name" placeholder="Nimetus" autofocus>
+    <label><input type="checkbox" id="m-is-container"> Tasku / alamkott</label>
+    <div class="modal-btns">
+      <button class="cancel" onclick="closeModal()">Tühista</button>
+      <button class="confirm" onclick="doAddItem(${containerId})">Lisa</button>
+    </div>
+  `);
+  setTimeout(() => document.getElementById('m-name')?.focus(), 300);
+}
+
+function doAddItem(containerId) {
+  const name = document.getElementById('m-name').value.trim();
+  const isContainer = document.getElementById('m-is-container').checked;
+  if (!name) return;
+  const siblings = getChildren(containerId);
+  const maxOrder = siblings.length ? Math.max(...siblings.map(s => s.order)) + 1 : 0;
+  data.push({ id: nextId++, name, isContainer, parentId: containerId, order: maxOrder });
+  openSections.add(containerId);
+  save(); closeModal(); render();
+}
+
+function confirmDelete(id, name) {
+  const node = data.find(d => d.id === id);
+  const isContainer = node && node.isContainer;
+  const label = isContainer ? 'Kustuta koos sisuga?' : 'Kustuta?';
+  openModal(`
+    <h3>${label}</h3>
+    <p style="margin-bottom:16px;color:var(--text2)">${esc(name)}</p>
+    <div class="modal-btns">
+      <button class="cancel" onclick="closeModal()">Tühista</button>
+      <button class="confirm" style="background:var(--danger)" onclick="doDelete(${id})">Kustuta</button>
+    </div>
+  `);
+}
+
+function doDelete(id) {
+  deleteNode(id);
+  save(); closeModal(); render();
+}
+
+function showMoveItem(itemId) {
+  const item = data.find(d => d.id === itemId);
+  const containers = getAllContainers();
+  const options = containers
+    .filter(c => c.id !== itemId)
+    .map(c => `<option value="${c.id}" ${c.id === item.parentId ? 'selected disabled' : ''}>${esc(getPath(c.id))}</option>`)
+    .join('');
+
+  openModal(`
+    <h3>Liiguta: ${esc(item.name)}</h3>
+    <select id="m-target">${options}</select>
+    <div class="modal-btns">
+      <button class="cancel" onclick="closeModal()">Tühista</button>
+      <button class="confirm" onclick="doMove(${itemId})">Liiguta</button>
+    </div>
+  `);
+}
+
+function doMove(itemId) {
+  const targetId = parseInt(document.getElementById('m-target').value);
+  const item = data.find(d => d.id === itemId);
+  if (!item || targetId === item.parentId) return;
+  const siblings = getChildren(targetId);
+  item.parentId = targetId;
+  item.order = siblings.length ? Math.max(...siblings.map(s => s.order)) + 1 : 0;
+  openSections.add(targetId);
+  save(); closeModal(); render();
+}
+
+// Init
+load();
+render();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+</script>
+</body>
+</html>

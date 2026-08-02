@@ -1,0 +1,16 @@
+{
+  "name": "KL Kotid",
+  "short_name": "KL Kotid",
+  "description": "Kaitseliidu varustuse haldamine",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f2f2f7",
+  "theme_color": "#385a4a",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23385a4a'/><text x='50' y='68' text-anchor='middle' font-size='50'>🎒</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
