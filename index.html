@@ -562,11 +562,15 @@ window.addEventListener('appinstalled', () => {
   banner.style.display = 'none';
 });
 
-// iOS install hint
-const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
-const isStandalone = window.navigator.standalone === true;
-if (isIos && !isStandalone) {
-  banner.textContent = 'Paigalda: Safari → jagamine → "Lisa avakuvale"';
+// Install hint for browsers without beforeinstallprompt
+const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+if (!isStandalone && !deferredPrompt) {
+  const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+  if (isIos) {
+    banner.innerHTML = 'Paigalda: vajuta <strong>jagamise nuppu</strong> &#x2934; all ja vali <strong>"Lisa avakuvale"</strong>';
+  } else {
+    banner.innerHTML = 'Paigalda: vajuta brauseri <strong>menüünuppu</strong> &#x22EE; ja vali <strong>"Lisa avakuvale"</strong>';
+  }
   banner.style.display = 'block';
   banner.style.cursor = 'default';
   banner.onclick = null;
