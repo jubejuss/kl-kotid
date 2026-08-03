@@ -335,6 +335,10 @@ function renderBag(bag) {
     }
   }
   content += `<div class="add-row" onclick="showAddItem(${bag.id})">+ Lisa...</div>`;
+  content += `<div class="add-row" style="gap:12px">
+    <span onclick="showRename(${bag.id},'${esc(bag.name)}')" style="cursor:pointer;color:var(--text2)">&#x270E; Muuda nime</span>
+    <span onclick="confirmDelete(${bag.id},'${esc(bag.name)}')" style="cursor:pointer;color:var(--danger)">&#x2715; Kustuta</span>
+  </div>`;
 
   return `<div class="bag">
     <div class="bag-header ${isOpen ? 'open' : ''}" onclick="toggle(${bag.id})">
@@ -367,6 +371,7 @@ function renderSubContainer(node) {
     <span class="name">${esc(node.name)}</span>
     <span class="count">${count}</span>
     <span class="chevron">&#x276F;</span>
+    <button class="action-btn" onclick="event.stopPropagation();showRename(${node.id},'${esc(node.name)}')" title="Muuda nime">&#x270E;</button>
     <button class="action-btn danger" onclick="event.stopPropagation();confirmDelete(${node.id},'${esc(node.name)}')" title="Kustuta">&#x2715;</button>
   </div>
   <div class="sub-content">${content}</div>`;
@@ -378,6 +383,7 @@ function renderItem(item, depth) {
     <span class="dot"></span>
     <span class="name">${esc(item.name)}</span>
     <span class="actions">
+      <button class="action-btn" onclick="showRename(${item.id},'${esc(item.name)}')" title="Muuda nime">&#x270E;</button>
       <button class="action-btn" onclick="showMoveItem(${item.id})" title="Liiguta">&#x21C5;</button>
       <button class="action-btn danger" onclick="confirmDelete(${item.id},'${esc(item.name)}')" title="Kustuta">&#x2715;</button>
     </span>
@@ -509,6 +515,26 @@ function doMove(itemId) {
   item.parentId = targetId;
   item.order = siblings.length ? Math.max(...siblings.map(s => s.order)) + 1 : 0;
   openSections.add(targetId);
+  save(); closeModal(); render();
+}
+
+function showRename(id, currentName) {
+  openModal(`
+    <h3>Muuda nime</h3>
+    <input type="text" id="m-name" value="${currentName}" autofocus>
+    <div class="modal-btns">
+      <button class="cancel" onclick="closeModal()">Tühista</button>
+      <button class="confirm" onclick="doRename(${id})">Salvesta</button>
+    </div>
+  `);
+  setTimeout(() => { const el = document.getElementById('m-name'); el?.focus(); el?.select(); }, 300);
+}
+
+function doRename(id) {
+  const name = document.getElementById('m-name').value.trim();
+  if (!name) return;
+  const node = data.find(d => d.id === id);
+  if (node) node.name = name;
   save(); closeModal(); render();
 }
 
