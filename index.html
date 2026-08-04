@@ -66,6 +66,86 @@ header h1 { font-size: 28px; font-weight: 700; }
   padding: 12px 20px 20px;
 }
 #app { padding: 0 0 80px; }
+#rev-report { padding: 0 0 80px; display: none; }
+
+.tab-bar {
+  display: flex; margin: 0 16px 4px; gap: 0;
+  background: var(--card); border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.tab-btn {
+  flex: 1; padding: 10px; text-align: center; font-size: 14px; font-weight: 600;
+  background: none; border: none; color: var(--text2); cursor: pointer;
+}
+.tab-btn.active { background: var(--accent); color: #fff; }
+
+.rev-toolbar {
+  display: flex; gap: 8px; margin: 8px 16px 0; align-items: center;
+}
+.rev-toolbar .search {
+  margin: 0; flex: 1; width: auto;
+}
+.rev-filter-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: none;
+  background: var(--card); color: var(--text2); font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; border: 1px solid var(--border); flex-shrink: 0;
+}
+.rev-filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.rev-filters {
+  display: none; margin: 4px 16px 0; gap: 8px;
+  background: var(--card); border-radius: 10px; padding: 10px 12px;
+  border: 1px solid var(--border);
+}
+.rev-filters.open { display: flex; flex-wrap: wrap; }
+.rev-filters label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--text2); cursor: pointer;
+}
+.rev-filters label input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+.rev-section {
+  margin: 8px 16px; background: var(--card);
+  border-radius: 12px; overflow: hidden;
+}
+.rev-header {
+  display: flex; align-items: center; padding: 14px 16px;
+  cursor: pointer; gap: 10px;
+}
+.rev-header .rev-title { flex: 1; }
+.rev-header .rev-title strong { font-size: 15px; display: block; }
+.rev-header .rev-title small { font-size: 11px; color: var(--text2); }
+.rev-header .count {
+  font-size: 12px; color: var(--text2);
+  background: var(--bg); padding: 2px 8px; border-radius: 10px;
+}
+.rev-header .chevron {
+  font-size: 13px; color: var(--text2); transition: transform 0.2s;
+}
+.rev-header.open .chevron { transform: rotate(90deg); }
+.rev-content { display: none; }
+.rev-header.open + .rev-content { display: block; }
+.rev-includes {
+  padding: 6px 16px; font-size: 12px; color: var(--text2);
+  border-top: 1px solid var(--border);
+}
+.rev-item {
+  display: flex; align-items: center; padding: 10px 16px; gap: 10px;
+  border-top: 1px solid var(--border);
+}
+.rev-item .check-icon {
+  width: 22px; height: 22px; flex-shrink: 0;
+  font-size: 18px; display: flex; align-items: center; justify-content: center;
+  color: var(--text3);
+}
+.rev-item .check-icon.covered { color: #34c759; }
+.rev-item .name { flex: 1; font-size: 14px; }
+.rev-item .name.unchecked { color: var(--text2); }
+.rev-linked {
+  padding: 3px 16px 3px 50px; font-size: 12px; color: var(--text2);
+  display: flex; align-items: baseline; gap: 4px;
+}
+.rev-linked .location { font-size: 10px; color: var(--text3); }
 
 .bag {
   margin: 8px 16px; background: var(--card);
@@ -76,7 +156,8 @@ header h1 { font-size: 28px; font-weight: 700; }
   cursor: pointer; gap: 10px;
 }
 .bag-header .icon { font-size: 18px; color: var(--accent); }
-.bag-header .name { flex: 1; font-weight: 600; font-size: 16px; }
+.bag-header .name-col { flex: 1; }
+.bag-header .name-col .name { font-weight: 600; font-size: 16px; display: block; }
 .bag-header .count {
   font-size: 12px; color: var(--text2);
   background: var(--bg); padding: 2px 8px; border-radius: 10px;
@@ -94,7 +175,8 @@ header h1 { font-size: 28px; font-weight: 700; }
   cursor: pointer; gap: 8px;
 }
 .sub-header .icon { font-size: 13px; color: var(--text2); }
-.sub-header .name { flex: 1; font-size: 15px; }
+.sub-header .name-col { flex: 1; }
+.sub-header .name-col .name { font-size: 15px; display: block; }
 .sub-header .count {
   font-size: 11px; color: var(--text2);
   background: var(--bg); padding: 1px 6px; border-radius: 8px;
@@ -105,15 +187,29 @@ header h1 { font-size: 28px; font-weight: 700; }
 .sub-header.open + .sub-content { display: block; }
 
 .item {
-  display: flex; align-items: center; padding: 10px 16px 10px 48px;
+  display: flex; align-items: flex-start; padding: 10px 16px 10px 48px;
   border-top: 1px solid var(--border); gap: 8px;
   position: relative; overflow: hidden;
 }
 .item.depth2 { padding-left: 64px; }
-.item .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
-.item .name { flex: 1; font-size: 15px; }
+.item .check-btn {
+  width: 22px; height: 22px; border-radius: 50%; border: none;
+  background: none; cursor: pointer; flex-shrink: 0;
+  font-size: 18px; display: flex; align-items: center; justify-content: center;
+  color: var(--text3); padding: 0; margin-top: 1px;
+}
+.item .check-btn.checked { color: #34c759; }
+.item .name-col { flex: 1; }
+.item .name-col .name { font-size: 15px; }
+.item .name-col .name.unchecked { color: var(--text2); }
+.rev-tag {
+  font-size: 10px; color: #007aff; background: rgba(0,122,255,0.12);
+  padding: 1px 5px; border-radius: 8px; white-space: nowrap;
+  display: inline-block; margin-top: 2px; margin-right: 3px;
+}
 .item .actions {
   display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s;
+  flex-shrink: 0;
 }
 .item:hover .actions, .item:focus-within .actions { opacity: 1; }
 .action-btn {
@@ -131,12 +227,10 @@ header h1 { font-size: 28px; font-weight: 700; }
 .add-row.depth2 { padding-left: 64px; }
 .add-row:hover { color: var(--accent); }
 
-/* Mobile: show actions always */
 @media (hover: none) {
   .item .actions { opacity: 1; }
 }
 
-/* Modal */
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.4);
   display: flex; align-items: flex-end; justify-content: center;
@@ -147,6 +241,7 @@ header h1 { font-size: 28px; font-weight: 700; }
   background: var(--card); border-radius: 16px 16px 0 0;
   width: 100%; max-width: 500px; padding: 20px 20px calc(20px + var(--safe-bottom));
   transform: translateY(100%); transition: transform 0.3s;
+  max-height: 80vh; overflow-y: auto;
 }
 .modal-overlay.active .modal { transform: translateY(0); }
 .modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
@@ -155,7 +250,7 @@ header h1 { font-size: 28px; font-weight: 700; }
   border-radius: 10px; font-size: 16px; background: var(--bg);
   color: var(--text); margin-bottom: 12px; outline: none;
 }
-.modal select { appearance: none; }
+.modal select { appearance: auto; }
 .modal label {
   display: flex; align-items: center; gap: 10px;
   font-size: 15px; margin-bottom: 16px; color: var(--text2);
@@ -169,7 +264,30 @@ header h1 { font-size: 28px; font-weight: 700; }
 .modal-btns .cancel { background: var(--bg); color: var(--text); }
 .modal-btns .confirm { background: var(--accent); color: #fff; }
 
-/* Search results */
+.rev-picker-section {
+  margin-bottom: 12px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+}
+.rev-picker-header {
+  display: flex; align-items: center; padding: 10px 12px; cursor: pointer;
+  background: var(--bg); gap: 8px;
+}
+.rev-picker-header .title { flex: 1; font-size: 14px; font-weight: 600; }
+.rev-picker-header .badge {
+  font-size: 11px; color: #34c759; background: rgba(52,199,89,0.15);
+  padding: 1px 6px; border-radius: 8px;
+}
+.rev-picker-header .chevron { font-size: 11px; color: var(--text2); transition: transform 0.2s; }
+.rev-picker-header.open .chevron { transform: rotate(90deg); }
+.rev-picker-items { display: none; }
+.rev-picker-header.open + .rev-picker-items { display: block; }
+.rev-picker-item {
+  display: flex; align-items: center; padding: 8px 12px; gap: 8px;
+  border-top: 1px solid var(--border); cursor: pointer; font-size: 14px;
+}
+.rev-picker-item:hover { background: var(--bg); }
+.rev-picker-item .check { color: var(--text3); font-size: 16px; }
+.rev-picker-item .check.on { color: #34c759; }
+
 .search-result {
   display: flex; align-items: center; padding: 12px 16px;
   border-bottom: 1px solid var(--border); gap: 10px;
@@ -188,10 +306,17 @@ header h1 { font-size: 28px; font-weight: 700; }
   <h1>KL Kotid</h1>
   <button class="btn-add" onclick="showAddBag()" title="Uus kott">+</button>
 </header>
-<input class="search" type="search" placeholder="Otsi varustust..." oninput="onSearch(this.value)">
-<div id="install-banner" onclick="installApp()">Paigalda rakendus</div>
-<div id="app"></div>
-<div class="hint">Vajuta koti nimele, et avada. Nupud asjade liigutamiseks ja kustutamiseks.</div>
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-bags" onclick="switchTab('bags')">Kotid</button>
+  <button class="tab-btn" id="tab-rev" onclick="switchTab('rev')">REV raport</button>
+</div>
+<div id="bags-view">
+  <input class="search" type="search" placeholder="Otsi varustust..." oninput="onSearch(this.value)">
+  <div id="install-banner" onclick="installApp()"></div>
+  <div id="app"></div>
+  <div class="hint">Vajuta koti nimele, et avada. Nupud asjade liigutamiseks ja kustutamiseks.</div>
+</div>
+<div id="rev-report"></div>
 
 <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal" id="modal-content"></div>
@@ -272,6 +397,11 @@ function load() {
   } else {
     data = JSON.parse(JSON.stringify(DEFAULT_DATA));
   }
+  for (const d of data) {
+    if (d.isChecked === undefined) d.isChecked = false;
+    if (d.revItemId === undefined) d.revItemId = null;
+    if (d.isNeeded === undefined) d.isNeeded = false;
+  }
   nextId = Math.max(...data.map(d => d.id), 0) + 1;
 }
 
@@ -291,6 +421,36 @@ function countItems(parentId) {
     else count++;
   }
   return count;
+}
+
+function countCheckedItems(parentId) {
+  const children = getChildren(parentId);
+  let count = 0;
+  for (const c of children) {
+    if (c.isContainer) count += countCheckedItems(c.id);
+    else if (c.isChecked) count++;
+  }
+  return count;
+}
+
+function uncheckAll(parentId) {
+  const children = getChildren(parentId);
+  for (const c of children) {
+    if (c.isContainer) uncheckAll(c.id);
+    else c.isChecked = false;
+  }
+}
+
+function toggleCheck(id) {
+  const item = data.find(d => d.id === id);
+  if (item) item.isChecked = !item.isChecked;
+  save(); render();
+}
+
+function toggleNeeded(id) {
+  const item = data.find(d => d.id === id);
+  if (item) item.isNeeded = !item.isNeeded;
+  save(); render();
 }
 
 function getPath(nodeId) {
@@ -313,18 +473,81 @@ function deleteNode(id) {
   data = data.filter(d => d.id !== id);
 }
 
+function getRevItemIds(node) {
+  if (!node.revItemId) return [];
+  return node.revItemId.split(',').filter(Boolean);
+}
+
+function setRevItemIds(node, ids) {
+  node.revItemId = ids.length ? ids.join(',') : null;
+}
+
+function getUniqueRevLabels(node) {
+  const ids = getRevItemIds(node);
+  const seen = new Set();
+  const labels = [];
+  for (const id of ids) {
+    const label = getREVLabel(id);
+    if (label && !seen.has(label)) {
+      seen.add(label);
+      labels.push(label);
+    }
+  }
+  return labels;
+}
+
+function getREVLabel(revItemId) {
+  if (!revItemId) return null;
+  for (const level of REV_LEVELS) {
+    if (level.items.some(i => i.id === revItemId)) return level.title;
+  }
+  return null;
+}
+
+function getLinkedItems(revItemId) {
+  return data.filter(d => {
+    const ids = getRevItemIds(d);
+    return ids.includes(revItemId);
+  });
+}
+
+function renderRevTags(node) {
+  const labels = getUniqueRevLabels(node);
+  if (!labels.length) return '';
+  return '<div style="margin-top:2px">' + labels.map(l => `<span class="rev-tag">${esc(l)}</span>`).join('') + '</div>';
+}
+
 function render() {
   const app = document.getElementById('app');
+  const needed = data.filter(d => !d.isContainer && d.isNeeded);
+  let neededHtml = '';
+  if (needed.length > 0) {
+    const items = needed.map(item => {
+      const parent = data.find(d => d.id === item.parentId);
+      const loc = parent ? ` <span style="font-size:11px;color:var(--text2)">${esc(getPath(parent.id))}</span>` : '';
+      return `<div class="item" style="border-left:3px solid var(--danger)">
+        <span style="color:var(--danger);font-size:16px">&#x2757;</span>
+        <span class="name-col"><span class="name">${esc(item.name)}</span>${loc}</span>
+        <button class="action-btn" onclick="toggleNeeded(${item.id})" title="Eemalda" style="color:#34c759;font-size:16px">&#x2714;</button>
+      </div>`;
+    }).join('');
+    neededHtml = `<div class="bag" style="border:1px solid var(--danger);border-radius:12px">
+      <div class="bag-header open" style="background:rgba(255,59,48,0.1);cursor:default">
+        <span style="color:var(--danger);font-size:16px">&#x26A0;</span>
+        <span class="name-col"><span class="name" style="color:var(--danger);font-weight:700">Vaja lisada</span></span>
+      </div>
+      <div class="bag-content">${items}</div>
+    </div>`;
+  }
   const bags = getChildren(null);
-  app.innerHTML = bags.map(bag => renderBag(bag)).join('');
+  app.innerHTML = neededHtml + bags.map(bag => renderBag(bag)).join('');
 }
 
 function renderBag(bag) {
   const isOpen = openSections.has(bag.id);
-  const count = countItems(bag.id);
+  const total = countItems(bag.id);
+  const checked = countCheckedItems(bag.id);
   const children = getChildren(bag.id);
-  const containers = children.filter(c => c.isContainer);
-  const items = children.filter(c => !c.isContainer);
 
   let content = '';
   for (const child of children) {
@@ -335,16 +558,23 @@ function renderBag(bag) {
     }
   }
   content += `<div class="add-row" onclick="showAddItem(${bag.id})">+ Lisa...</div>`;
-  content += `<div class="add-row" style="gap:12px">
+  content += `<div class="add-row" style="gap:12px;flex-wrap:wrap">
+    <span onclick="showSetREV(${bag.id})" style="cursor:pointer;color:var(--text2)">&#x1F4CB; Määra REV</span>
     <span onclick="showRename(${bag.id},'${esc(bag.name)}')" style="cursor:pointer;color:var(--text2)">&#x270E; Muuda nime</span>
+    <span onclick="showMoveItem(${bag.id})" style="cursor:pointer;color:var(--text2)">&#x21C5; Liiguta</span>
+    <span onclick="doMoveUp(${bag.id})" style="cursor:pointer;color:var(--text2)">&#x2191; Üles</span>
+    <span onclick="doMoveDown(${bag.id})" style="cursor:pointer;color:var(--text2)">&#x2193; Alla</span>
+    ${checked > 0 ? `<span onclick="doUncheckAll(${bag.id})" style="cursor:pointer;color:var(--text2)">&#x21BA; Tühjenda linnukesed</span>` : ''}
     <span onclick="confirmDelete(${bag.id},'${esc(bag.name)}')" style="cursor:pointer;color:var(--danger)">&#x2715; Kustuta</span>
   </div>`;
 
+  const countColor = checked === total && total > 0 ? 'color:#34c759' : '';
+  const revTags = renderRevTags(bag);
   return `<div class="bag">
     <div class="bag-header ${isOpen ? 'open' : ''}" onclick="toggle(${bag.id})">
       <span class="icon">&#x1F392;</span>
-      <span class="name">${esc(bag.name)}</span>
-      <span class="count">${count}</span>
+      <span class="name-col"><span class="name">${esc(bag.name)}</span>${revTags}</span>
+      <span class="count" style="${countColor}">${checked}/${total}</span>
       <span class="chevron">&#x276F;</span>
     </div>
     <div class="bag-content">${content}</div>
@@ -353,7 +583,8 @@ function renderBag(bag) {
 
 function renderSubContainer(node) {
   const isOpen = openSections.has(node.id);
-  const count = countItems(node.id);
+  const total = countItems(node.id);
+  const checked = countCheckedItems(node.id);
   const children = getChildren(node.id);
 
   let content = '';
@@ -366,12 +597,18 @@ function renderSubContainer(node) {
   }
   content += `<div class="add-row depth2" onclick="showAddItem(${node.id})">+ Lisa...</div>`;
 
+  const countColor = checked === total && total > 0 ? 'color:#34c759' : '';
+  const revTags = renderRevTags(node);
   return `<div class="sub-header ${isOpen ? 'open' : ''}" onclick="toggle(${node.id})">
     <span class="icon">&#x1F4C1;</span>
-    <span class="name">${esc(node.name)}</span>
-    <span class="count">${count}</span>
+    <span class="name-col"><span class="name">${esc(node.name)}</span>${revTags}</span>
+    <span class="count" style="${countColor}">${checked}/${total}</span>
     <span class="chevron">&#x276F;</span>
+    <button class="action-btn" onclick="event.stopPropagation();showSetREV(${node.id})" title="Määra REV">&#x1F4CB;</button>
     <button class="action-btn" onclick="event.stopPropagation();showRename(${node.id},'${esc(node.name)}')" title="Muuda nime">&#x270E;</button>
+    <button class="action-btn" onclick="event.stopPropagation();showMoveItem(${node.id})" title="Liiguta">&#x21C5;</button>
+    <button class="action-btn" onclick="event.stopPropagation();doMoveUp(${node.id})" title="Üles">&#x2191;</button>
+    <button class="action-btn" onclick="event.stopPropagation();doMoveDown(${node.id})" title="Alla">&#x2193;</button>
     <button class="action-btn danger" onclick="event.stopPropagation();confirmDelete(${node.id},'${esc(node.name)}')" title="Kustuta">&#x2715;</button>
   </div>
   <div class="sub-content">${content}</div>`;
@@ -379,12 +616,18 @@ function renderSubContainer(node) {
 
 function renderItem(item, depth) {
   const depthClass = depth >= 2 ? ' depth2' : '';
+  const checked = item.isChecked;
+  const revTags = renderRevTags(item);
   return `<div class="item${depthClass}">
-    <span class="dot"></span>
-    <span class="name">${esc(item.name)}</span>
+    <button class="check-btn${checked ? ' checked' : ''}" onclick="toggleCheck(${item.id})">${checked ? '&#x2714;' : '&#x25CB;'}</button>
+    <span class="name-col"><span class="name${checked ? '' : ' unchecked'}">${esc(item.name)}</span>${item.isNeeded ? ' <span style="color:var(--danger);font-size:14px">&#x2757;</span>' : ''}${revTags}</span>
     <span class="actions">
+      <button class="action-btn" onclick="toggleNeeded(${item.id})" title="${item.isNeeded ? 'Eemalda meeldetuletus' : 'Vaja lisada!'}" style="${item.isNeeded ? 'color:var(--danger)' : ''}">${item.isNeeded ? '&#x2757;' : '&#x2755;'}</button>
+      <button class="action-btn" onclick="showSetREV(${item.id})" title="Määra REV">&#x1F4CB;</button>
       <button class="action-btn" onclick="showRename(${item.id},'${esc(item.name)}')" title="Muuda nime">&#x270E;</button>
       <button class="action-btn" onclick="showMoveItem(${item.id})" title="Liiguta">&#x21C5;</button>
+      <button class="action-btn" onclick="doMoveUp(${item.id})" title="Üles">&#x2191;</button>
+      <button class="action-btn" onclick="doMoveDown(${item.id})" title="Alla">&#x2193;</button>
       <button class="action-btn danger" onclick="confirmDelete(${item.id},'${esc(item.name)}')" title="Kustuta">&#x2715;</button>
     </span>
   </div>`;
@@ -414,6 +657,33 @@ function onSearch(query) {
   }).join('') || '<div class="hint">Ei leitud</div>';
 }
 
+// Reorder
+function doMoveUp(id) {
+  const node = data.find(d => d.id === id);
+  if (!node) return;
+  const siblings = getChildren(node.parentId);
+  const idx = siblings.findIndex(s => s.id === id);
+  if (idx <= 0) return;
+  const prev = siblings[idx - 1];
+  const tmp = node.order;
+  node.order = prev.order;
+  prev.order = tmp;
+  save(); render();
+}
+
+function doMoveDown(id) {
+  const node = data.find(d => d.id === id);
+  if (!node) return;
+  const siblings = getChildren(node.parentId);
+  const idx = siblings.findIndex(s => s.id === id);
+  if (idx < 0 || idx >= siblings.length - 1) return;
+  const next = siblings[idx + 1];
+  const tmp = node.order;
+  node.order = next.order;
+  next.order = tmp;
+  save(); render();
+}
+
 // Modals
 function openModal(html) {
   document.getElementById('modal-content').innerHTML = html;
@@ -441,7 +711,7 @@ function doAddBag() {
   if (!name) return;
   const bags = getChildren(null);
   const maxOrder = bags.length ? Math.max(...bags.map(b => b.order)) + 1 : 0;
-  data.push({ id: nextId++, name, isContainer: true, parentId: null, order: maxOrder });
+  data.push({ id: nextId++, name, isContainer: true, parentId: null, order: maxOrder, isChecked: false, revItemId: null });
   save(); closeModal(); render();
 }
 
@@ -451,6 +721,7 @@ function showAddItem(containerId) {
     <h3>Lisa: ${esc(container.name)}</h3>
     <input type="text" id="m-name" placeholder="Nimetus" autofocus>
     <label><input type="checkbox" id="m-is-container"> Tasku / alamkott</label>
+    <div id="m-rev-picker">${buildREVPicker([])}</div>
     <div class="modal-btns">
       <button class="cancel" onclick="closeModal()">Tühista</button>
       <button class="confirm" onclick="doAddItem(${containerId})">Lisa</button>
@@ -465,7 +736,9 @@ function doAddItem(containerId) {
   if (!name) return;
   const siblings = getChildren(containerId);
   const maxOrder = siblings.length ? Math.max(...siblings.map(s => s.order)) + 1 : 0;
-  data.push({ id: nextId++, name, isContainer, parentId: containerId, order: maxOrder });
+  const selectedIds = getPickerSelectedIds();
+  const revId = selectedIds.length ? selectedIds.join(',') : null;
+  data.push({ id: nextId++, name, isContainer, parentId: containerId, order: maxOrder, isChecked: false, revItemId: revId });
   openSections.add(containerId);
   save(); closeModal(); render();
 }
@@ -489,17 +762,26 @@ function doDelete(id) {
   save(); closeModal(); render();
 }
 
+function isDescendantOf(nodeId, ancestorId) {
+  let current = data.find(d => d.id === nodeId);
+  while (current) {
+    if (current.id === ancestorId) return true;
+    current = current.parentId ? data.find(d => d.id === current.parentId) : null;
+  }
+  return false;
+}
+
 function showMoveItem(itemId) {
   const item = data.find(d => d.id === itemId);
   const containers = getAllContainers();
   const options = containers
-    .filter(c => c.id !== itemId)
+    .filter(c => c.id !== itemId && !isDescendantOf(c.id, itemId))
     .map(c => `<option value="${c.id}" ${c.id === item.parentId ? 'selected disabled' : ''}>${esc(getPath(c.id))}</option>`)
     .join('');
 
   openModal(`
     <h3>Liiguta: ${esc(item.name)}</h3>
-    <select id="m-target">${options}</select>
+    <select id="m-target" style="appearance:auto">${options}</select>
     <div class="modal-btns">
       <button class="cancel" onclick="closeModal()">Tühista</button>
       <button class="confirm" onclick="doMove(${itemId})">Liiguta</button>
@@ -538,6 +820,300 @@ function doRename(id) {
   save(); closeModal(); render();
 }
 
+// REV picker (accordion with multi-select)
+let revPickerOpen = new Set();
+
+function buildREVPicker(selectedIds) {
+  let html = '<div style="font-size:13px;color:var(--text2);margin-bottom:8px">REV kategooriad</div>';
+  if (selectedIds.length) {
+    html += `<div style="margin-bottom:8px"><span onclick="clearRevPicker()" style="cursor:pointer;color:var(--danger);font-size:13px">Eemalda koik</span></div>`;
+  }
+  for (const level of REV_LEVELS) {
+    const levelSelected = level.items.filter(i => selectedIds.includes(i.id)).length;
+    const isOpen = revPickerOpen.has(level.id);
+    html += `<div class="rev-picker-section">`;
+    html += `<div class="rev-picker-header ${isOpen ? 'open' : ''}" onclick="toggleRevPicker('${level.id}')">
+      <span class="title">${esc(level.title)} - ${esc(level.subtitle)}</span>
+      ${levelSelected > 0 ? `<span class="badge">${levelSelected}</span>` : ''}
+      <span class="chevron">&#x276F;</span>
+    </div>`;
+    html += `<div class="rev-picker-items">`;
+    for (const item of level.items) {
+      const isOn = selectedIds.includes(item.id);
+      html += `<div class="rev-picker-item" onclick="toggleRevPickerItem('${item.id}')">
+        <span class="check ${isOn ? 'on' : ''}">${isOn ? '&#x2714;' : '&#x25CB;'}</span>
+        <span>${esc(item.name)}</span>
+      </div>`;
+    }
+    html += `</div></div>`;
+  }
+  return html;
+}
+
+function toggleRevPicker(levelId) {
+  if (revPickerOpen.has(levelId)) revPickerOpen.delete(levelId);
+  else revPickerOpen.add(levelId);
+  refreshRevPicker();
+}
+
+function toggleRevPickerItem(itemId) {
+  const el = document.getElementById('m-rev-picker');
+  if (!el) return;
+  const current = getPickerSelectedIds();
+  const idx = current.indexOf(itemId);
+  if (idx >= 0) current.splice(idx, 1);
+  else current.push(itemId);
+  el.dataset.selected = current.join(',');
+  refreshRevPicker();
+}
+
+function clearRevPicker() {
+  const el = document.getElementById('m-rev-picker');
+  if (el) el.dataset.selected = '';
+  refreshRevPicker();
+}
+
+function refreshRevPicker() {
+  const el = document.getElementById('m-rev-picker');
+  if (!el) return;
+  const ids = getPickerSelectedIds();
+  el.innerHTML = buildREVPicker(ids);
+}
+
+function getPickerSelectedIds() {
+  const el = document.getElementById('m-rev-picker');
+  if (!el || !el.dataset.selected) return [];
+  return el.dataset.selected.split(',').filter(Boolean);
+}
+
+function showSetREV(itemId) {
+  const item = data.find(d => d.id === itemId);
+  const currentIds = getRevItemIds(item);
+  revPickerOpen = new Set();
+  openModal(`
+    <h3>Määra REV: ${esc(item.name)}</h3>
+    <div id="m-rev-picker" data-selected="${currentIds.join(',')}">${buildREVPicker(currentIds)}</div>
+    <div class="modal-btns">
+      <button class="cancel" onclick="closeModal()">Tühista</button>
+      <button class="confirm" onclick="doSetREV(${itemId})">Salvesta</button>
+    </div>
+  `);
+}
+
+function doSetREV(itemId) {
+  const selectedIds = getPickerSelectedIds();
+  const item = data.find(d => d.id === itemId);
+  if (item) setRevItemIds(item, selectedIds);
+  save(); closeModal(); render();
+}
+
+function doUncheckAll(parentId) {
+  uncheckAll(parentId);
+  save(); render();
+}
+
+// Tabs
+function switchTab(tab) {
+  document.getElementById('tab-bags').classList.toggle('active', tab === 'bags');
+  document.getElementById('tab-rev').classList.toggle('active', tab === 'rev');
+  document.getElementById('bags-view').style.display = tab === 'bags' ? '' : 'none';
+  document.getElementById('rev-report').style.display = tab === 'rev' ? 'block' : 'none';
+  if (tab === 'rev') renderREV();
+}
+
+// REV data
+const REV_LEVELS = [
+  { id: 'rev1', title: 'REV 1', subtitle: 'Välivorm', duration: 'Duty Dress', includes: null, items: [
+    { id: 'r1_01', name: 'Välivorm (vastavalt ilmastikule ja aastaajale)' },
+    { id: 'r1_02', name: 'Saapad ja vajadusel saapakatted' },
+    { id: 'r1_03', name: 'Peakate (vastavalt aastaajale)' },
+    { id: 'r1_04', name: 'Märkmik' },
+    { id: 'r1_05', name: 'Kirjutusvahend' },
+    { id: 'r1_06', name: 'MK-1 (žgutt, meditsiinipakk, kolmnurkrätik, esmaabi juhend)' },
+    { id: 'r1_07', name: 'MIST kaart ja marker' },
+    { id: 'r1_08', name: 'KL liikmekaart, töötõend, ID-kaart, juhiload' },
+    { id: 'r1_09', name: 'Tunnusplaadid' },
+  ]},
+  { id: 'rev2', title: 'REV 2', subtitle: 'Rünnakuvarustus', duration: 'Fighting Set - kuni 4 tundi', includes: 'REV 1', items: [
+    { id: 'r2_01', name: 'Relvakomplekt vastavalt tabelvarustusele' },
+    { id: 'r2_02', name: 'Kompensaator' },
+    { id: 'r2_03', name: 'Laskemoon' },
+    { id: 'r2_04', name: 'Kuulivest vastavalt tabelvarustusele' },
+    { id: 'r2_05', name: 'Kiiver kiivrikattega' },
+    { id: 'r2_06', name: 'Kiivrialune müts' },
+    { id: 'r2_07', name: 'Kaitseprillid' },
+    { id: 'r2_08', name: 'Kuulmiskaitsevahendid (2 paari)' },
+    { id: 'r2_09', name: 'Põlvekaitsmed' },
+    { id: 'r2_10', name: 'Küünarnukikaitsmed' },
+    { id: 'r2_11', name: 'Taktikalised kindad' },
+    { id: 'r2_12', name: 'Talvine moondamisvorm', isWinter: true },
+    { id: 'r2_13', name: 'Rakmed / lahingvest' },
+    { id: 'r2_14', name: 'Jalaväelabidas' },
+    { id: 'r2_15', name: 'Veepudel, min 0,7L' },
+    { id: 'r2_16', name: 'Tääk / nuga' },
+    { id: 'r2_17', name: 'Maskeerimisvahendid (must, pruun, roheline)' },
+    { id: 'r2_18', name: '10 m nööri' },
+    { id: 'r2_19', name: 'Patareid igale seadmele' },
+    { id: 'r2_20', name: 'Kaablivitsad (2x suur, 2x väike)' },
+    { id: 'r2_21', name: 'Gaasimaski komplekt kotiga' },
+    { id: 'r2_22', name: 'Lisalaskemoon' },
+    { id: 'r2_23', name: 'Pealamp punase filtriga' },
+    { id: 'r2_24', name: 'Erivarustus vastavalt ülesandele' },
+    { id: 'r2_25', name: 'Tuletegemise vahendid' },
+  ]},
+  { id: 'rev3', title: 'REV 3', subtitle: 'Lahinguvarustus', duration: 'Combat Set - 4 kuni 24 tundi', includes: 'REV 2', items: [
+    { id: 'r3_01', name: 'Patrullkott või seljakoti küljetaskud' },
+    { id: 'r3_02', name: 'Vahetusriided (2 paari sokke, soe pesu, T-särk, aluspesu)' },
+    { id: 'r3_03', name: 'Talvevormi jope kapuutsiga ilma voodrita', isWinter: true },
+    { id: 'r3_04', name: 'Söögitegemise vahendid (katelok, põleti, piiritusepudel, joogitops, nuga, kahvel, lusikas)' },
+    { id: 'r3_05', name: 'Vihmaülikond' },
+    { id: 'r3_06', name: 'Telkmantel koos nööridega' },
+    { id: 'r3_07', name: '24 h toiduratsioon' },
+    { id: 'r3_08', name: 'Lisa 2L joogivesi' },
+    { id: 'r3_09', name: 'Relva kompensaator' },
+  ]},
+  { id: 'rev4', title: 'REV 4', subtitle: 'Lahinguvõime taastamise varustus', duration: 'Reorg Set - 24 kuni 72 tundi', includes: 'REV 3', items: [
+    { id: 'r4_01', name: 'Magamiskott' },
+    { id: 'r4_02', name: 'Rullmatt' },
+    { id: 'r4_03', name: 'Seljakott' },
+    { id: 'r4_04', name: 'Vahetus välivormi komplekt' },
+    { id: 'r4_05', name: '24 h toiduratsioon' },
+    { id: 'r4_06', name: 'Sviiter või fliis' },
+    { id: 'r4_07', name: 'Vahetussaapad / saapakatted' },
+    { id: 'r4_08', name: 'Talvejope ja vooder', isWinter: true },
+    { id: 'r4_09', name: 'Vahetusriided (2x T-särk, 3x aluspesu, 2 paari sokke, 3x talvesokid)', isWinter: true },
+    { id: 'r4_10', name: 'Hügieenitarbed (habemeajamine, seep, käterätik, jalarätik, hambahari, hambapasta)' },
+    { id: 'r4_11', name: 'Peakatted (skautmüts, nokamüts, kiivrialune müts)' },
+    { id: 'r4_12', name: 'Varu sõrmkindad' },
+    { id: 'r4_13', name: 'Labakindad (talve)', isWinter: true },
+    { id: 'r4_14', name: 'Vormi- ja saapahoolduskomplekt' },
+    { id: 'r4_15', name: 'Kuuliplaadid kuulivestile' },
+    { id: 'r4_16', name: 'Küünarnukikaitsmed' },
+    { id: 'r4_17', name: 'Gaasimask koos koti ja filtriga' },
+    { id: 'r4_18', name: 'Keemiakaitseülikond' },
+    { id: 'r4_19', name: 'Kateloki komplekt' },
+    { id: 'r4_20', name: 'Plätud' },
+    { id: 'r4_21', name: 'Isiklikud asjad' },
+  ]},
+  { id: 'rev5', title: 'REV 5', subtitle: 'Lisavarustus', duration: 'Additional Equipment', includes: 'REV 4', items: [
+    { id: 'r5_01', name: 'Torukott' },
+    { id: 'r5_02', name: 'Talvine välivorm', isWinter: true },
+    { id: 'r5_03', name: 'Talvine moondamisvorm', isWinter: true },
+    { id: 'r5_04', name: 'Kõik laost väljastatud riideelemendid' },
+    { id: 'r5_05', name: 'Magamiskott (vastavalt vajadusele)' },
+    { id: 'r5_06', name: 'Kuulivestikott koos lisa kaitseelementidega' },
+    { id: 'r5_07', name: 'Spordiriided (lühike- ja pikk dress)' },
+    { id: 'r5_08', name: 'Spordijalatsid' },
+  ]},
+];
+
+let revOpenSections = new Set();
+let revSearchQuery = '';
+let revShowMissingOnly = false;
+let revHideWinter = false;
+
+function toggleREVSection(id) {
+  if (revOpenSections.has(id)) revOpenSections.delete(id);
+  else revOpenSections.add(id);
+  renderREV();
+}
+
+function onRevSearch(query) {
+  revSearchQuery = query.toLowerCase();
+  renderREV();
+}
+
+function toggleRevFilter(type) {
+  if (type === 'missing') revShowMissingOnly = !revShowMissingOnly;
+  if (type === 'winter') revHideWinter = !revHideWinter;
+  renderREV();
+}
+
+function toggleRevFiltersPanel() {
+  document.getElementById('rev-filters-panel')?.classList.toggle('open');
+}
+
+function renderREV() {
+  const el = document.getElementById('rev-report');
+  const hasFilter = revShowMissingOnly || revHideWinter;
+  const query = revSearchQuery;
+
+  let toolbar = `<div class="rev-toolbar">
+    <input class="search" type="search" placeholder="Otsi REV nimetust..." value="${esc(revSearchQuery)}" oninput="onRevSearch(this.value)">
+    <button class="rev-filter-btn ${hasFilter ? 'active' : ''}" onclick="toggleRevFiltersPanel()" title="Filtrid">&#x2630;</button>
+  </div>
+  <div class="rev-filters ${document.getElementById('rev-filters-panel')?.classList.contains('open') ? 'open' : ''}" id="rev-filters-panel">
+    <label><input type="checkbox" ${revShowMissingOnly ? 'checked' : ''} onchange="toggleRevFilter('missing')"> Ainult puuduvad</label>
+    <label><input type="checkbox" ${revHideWinter ? 'checked' : ''} onchange="toggleRevFilter('winter')"> Peida talvised</label>
+  </div>`;
+
+  let sections = REV_LEVELS.map(level => {
+    let items = level.items;
+
+    if (query) {
+      const matchingItems = items.filter(item =>
+        item.name.toLowerCase().includes(query) ||
+        getLinkedItems(item.id).some(g => g.name.toLowerCase().includes(query))
+      );
+      const levelMatches = level.title.toLowerCase().includes(query) ||
+        level.subtitle.toLowerCase().includes(query);
+      if (!matchingItems.length && !levelMatches) return '';
+      if (matchingItems.length || !levelMatches) items = matchingItems.length ? matchingItems : items;
+    }
+
+    if (revHideWinter) {
+      items = items.filter(i => !i.isWinter);
+    }
+
+    if (revShowMissingOnly) {
+      items = items.filter(i => getLinkedItems(i.id).length === 0);
+    }
+
+    if (!items.length) return '';
+
+    const isOpen = revOpenSections.has(level.id);
+    const total = items.length;
+    const coveredCount = items.filter(item => getLinkedItems(item.id).length > 0).length;
+    const countColor = coveredCount === total && total > 0 ? 'color:#34c759' : '';
+
+    let content = '';
+    if (level.includes) {
+      content += `<div class="rev-includes">↳ Sisaldab ${esc(level.includes)}</div>`;
+    }
+    content += items.map(item => {
+      const linked = getLinkedItems(item.id);
+      const hasCoverage = linked.length > 0;
+      let html = `<div class="rev-item">
+        <span class="check-icon${hasCoverage ? ' covered' : ''}">${hasCoverage ? '&#x2714;' : '&#x25CB;'}</span>
+        <span class="name${hasCoverage ? '' : ' unchecked'}">${esc(item.name)}</span>
+      </div>`;
+      if (linked.length > 0) {
+        html += linked.map(gear => {
+          const parentPath = gear.parentId ? getPath(gear.parentId) : '';
+          return `<div class="rev-linked">
+            ↳ ${esc(gear.name)}${parentPath ? ` <span class="location">· ${esc(parentPath)}</span>` : ''}
+          </div>`;
+        }).join('');
+      }
+      return html;
+    }).join('');
+
+    return `<div class="rev-section">
+      <div class="rev-header ${isOpen ? 'open' : ''}" onclick="toggleREVSection('${level.id}')">
+        <div class="rev-title">
+          <strong>${esc(level.title)} - ${esc(level.subtitle)}</strong>
+          <small>${esc(level.duration)}</small>
+        </div>
+        <span class="count" style="${countColor}">${coveredCount}/${total}</span>
+        <span class="chevron">&#x276F;</span>
+      </div>
+      <div class="rev-content">${content}</div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = toolbar + sections;
+}
+
 // Install prompt
 let deferredPrompt = null;
 const banner = document.getElementById('install-banner');
@@ -562,7 +1138,6 @@ window.addEventListener('appinstalled', () => {
   banner.style.display = 'none';
 });
 
-// Install hint for browsers without beforeinstallprompt
 const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
 if (!isStandalone && !deferredPrompt) {
   const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
